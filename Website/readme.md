@@ -1,1 +1,0 @@
-This is to be the hosting server for ArcGIS Javascript testing
