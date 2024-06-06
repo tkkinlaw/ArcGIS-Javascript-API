@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Search Knowledge Graph | Sample | ArcGIS Maps SDK for JavaScript 4.29</title>
+
+    <script type="module" src="https://js.arcgis.com/calcite-components/2.5.1/calcite.esm.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/2.5.1/calcite.css" />
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.29/"></script>
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/rest/knowledgeGraphService",
+            "esri/layers/KnowledgeGraphLayer",
+            "esri/layers/support/LabelClass",
+            "esri/PopupTemplate",
+            "esri/widgets/Legend",
+        ], (EsriMap, MapView, KnowledgeGraphService, KnowledgeGraphLayer, LabelClass, PopupTemplate,  Legend) => {
+            /**
+             * Credentials to sign in to the knowledge graph service:
+             * username: viewer01
+             * password: I68VGU^nMurF
+             */
+            //url to knowledge graph service
+            const url = "https://adsrv2019.ad.local/server/rest/services/Hosted/SupplyChain_finished/KnowledgeGraphServer";
+            //initialize map canvas and map view
+            const map = new EsriMap({
+                basemap: "gray-vector"
+            });
+
+            const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                zoom: 2,
+                center: [-30, 30],
+                constraints: { minZoom: 2 }
+            });
+            view.ui.add(new Legend({ view: view }), "bottom-right");
+
+            //define renderer for the geometry (all of the Observations are point geometry)
+            const observationRenderer = {
+                type: "simple", // autocasts as new SimpleFillSymbol()
+                symbol: {
+                    type: "simple-marker",
+                    size: 6,
+                    color: "yellow",
+                    outline: {  // autocasts as new SimpleLineSymbol()
+                        width: 0.5,
+                        color: "black"
+                    }
+                }
+            };
+
+            const initializeLayer = async () => {
+                //fetch the knowledge graph
+                knowledgeGraph = await KnowledgeGraphService.fetchKnowledgeGraph(url)
+
+                //create the layer
+                const compositeLayer = new KnowledgeGraphLayer({
+                    url: url
+                });
+
+                //once the layer has loaded, enable popups and apply the renderer
+                await compositeLayer.load()
+                compositeLayer.layers.items.forEach((sublayer) => {
+                    console.log(sublayer)
+                    sublayer.popupTemplate = sublayer.createPopupTemplate();
+                    sublayer.renderer = observationRenderer;
+                });
+                map.add(compositeLayer);
+            }
+            initializeLayer()
+        })
+    </script>
+</head>
+
+<body>
+    <div id="viewDiv"></div>
+</body>
+
+</html>
