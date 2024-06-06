@@ -30,7 +30,7 @@
             "esri/layers/support/LabelClass",
             "esri/PopupTemplate",
             "esri/widgets/Legend",
-        ], (EsriMap, MapView, KnowledgeGraphService, KnowledgeGraphLayer, LabelClass, PopupTemplate,  Legend) => {
+        ], (EsriMap, MapView, KnowledgeGraphService, KnowledgeGraphLayer, LabelClass, PopupTemplate, Legend) => {
             /**
              * Credentials to sign in to the knowledge graph service:
              * username: viewer01
@@ -53,7 +53,7 @@
             view.ui.add(new Legend({ view: view }), "bottom-right");
 
             //define renderer for the geometry (all of the Observations are point geometry)
-            const observationRenderer = {
+            const supplierRenderer = {
                 type: "simple", // autocasts as new SimpleFillSymbol()
                 symbol: {
                     type: "simple-marker",
@@ -80,7 +80,7 @@
                 compositeLayer.layers.items.forEach((sublayer) => {
                     console.log(sublayer)
                     sublayer.popupTemplate = sublayer.createPopupTemplate();
-                    sublayer.renderer = observationRenderer;
+                    sublayer.renderer = supplierRenderer;
                 });
                 map.add(compositeLayer);
             }
