@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Search Knowledge Graph | Sample | ArcGIS Maps SDK for JavaScript 4.29</title>
+
+    <script type="module" src="https://js.arcgis.com/calcite-components/2.5.1/calcite.esm.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/2.5.1/calcite.css" />
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.29/"></script>
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/rest/knowledgeGraphService",
+            "esri/layers/KnowledgeGraphLayer",
+            "esri/layers/support/LabelClass",
+            "esri/PopupTemplate",
+            "esri/widgets/Legend",
+        ], (EsriMap, MapView, KnowledgeGraphService, KnowledgeGraphLayer, LabelClass, PopupTemplate, Legend) => {
+
+            //url to knowledge graph service
+            const url = "https://adsrv2019.ad.local/server/rest/services/Hosted/SupplyChain_finished/KnowledgeGraphServer";
+            //initialize map canvas and map view
+            const map = new EsriMap({
+                basemap: "gray-vector"
+            });
+
+            const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                zoom: 2,
+                center: [-30, 30],
+                constraints: { minZoom: 2 }
+            });
+            view.ui.add(new Legend({ view: view }), "bottom-right");
+
+            const supplierRenderer = {
+                type: "simple", // autocasts as new SimpleFillSymbol()
+                symbol: {
+                    type: "simple-marker",
+                    size: 6,
+                    color: "yellow",
+                    outline: {  // autocasts as new SimpleLineSymbol()
+                        width: 0.5,
+                        color: "black"
+                    }
+                }
+            };
+
+            const distributorRenderer = {
+                type: "simple", // autocasts as new SimpleFillSymbol()
+                symbol: {
+                    type: "simple-marker",
+                    size: 6,
+                    color: "blue",
+                    outline: {  // autocasts as new SimpleLineSymbol()
+                        width: 0.5,
+                        color: "black"
+                    }
+                }
+            };
+
+            const initializeLayer = async () => {
+                //fetch the knowledge graph
+                knowledgeGraph = await KnowledgeGraphService.fetchKnowledgeGraph(url)
+
+                let namedTypes = new Map();
+
+                // Get Suppliers
+                supplierResults = await KnowledgeGraphService.executeQuery(knowledgeGraph, {
+                    openCypherQuery: `MATCH (s:Supplier) RETURN s`
+                })
+
+                const supplierMembers = new Map();
+                for (supplier of supplierResults.resultRows) {
+                    supplierMembers.set(supplier[0].id, { id: supplier[0].id })
+                }
+
+                namedTypes.set("Supplier", { useAllData: false, members: supplierMembers});
+
+                // Get Distributors
+                distributorResults = await KnowledgeGraphService.executeQuery(knowledgeGraph, {
+                    openCypherQuery: `MATCH (d:Distributor) RETURN d`
+                })
+
+                const distributorMembers = new Map();
+                for (distributor of distributorResults.resultRows) {
+                    distributorMembers.set(distributor[0].id, { id: distributor[0].id })
+                }
+
+                namedTypes.set("Distributor", { useAllData: false, members: distributorMembers});
+
+                // specify the layer structure
+                const inclusionDef = {
+                    generateAllSublayers: false,
+                    namedTypeDefinitions: namedTypes
+                }
+
+                //create the layer
+                const compositeLayer = new KnowledgeGraphLayer({
+                    url: url,
+                    inclusionModeDefinition: inclusionDef
+                });
+
+                // load layer and display
+                await compositeLayer.load()
+                const sublayer1 = compositeLayer.layers.items[0]
+                sublayer1.renderer = supplierRenderer
+                const sublayer2 = compositeLayer.layers.items[1]
+                sublayer2.renderer = distributorRenderer
+                map.add(compositeLayer)
+            }
+            initializeLayer()
+        })
+    </script>
+</head>
+
+<body>
+    <div id="viewDiv"></div>
+</body>
+
+</html>

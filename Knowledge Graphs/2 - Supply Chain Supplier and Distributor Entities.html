@@ -118,11 +118,11 @@
 
                 // load layer and display
                 await compositeLayer.load()
-                const sublayer1 = compositeLayer.layers.items[0];
+                const sublayer1 = compositeLayer.layers.items[0]
                 sublayer1.renderer = supplierRenderer
-                const sublayer2 = compositeLayer.layers.items[1];
+                const sublayer2 = compositeLayer.layers.items[1]
                 sublayer2.renderer = distributorRenderer
-                map.add(compositeLayer);
+                map.add(compositeLayer)
             }
             initializeLayer()
         })
