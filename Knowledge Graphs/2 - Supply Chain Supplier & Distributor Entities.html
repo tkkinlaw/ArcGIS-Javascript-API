@@ -116,15 +116,12 @@
                     inclusionModeDefinition: inclusionDef
                 });
 
-                //once the layer has loaded, enable popups and apply the renderer
+                // load layer and display
                 await compositeLayer.load()
                 const sublayer1 = compositeLayer.layers.items[0];
                 sublayer1.renderer = supplierRenderer
                 const sublayer2 = compositeLayer.layers.items[1];
                 sublayer2.renderer = distributorRenderer
-                //compositeLayer.layers.items.forEach((sublayer) => {
-                //    sublayer.popupTemplate = sublayer.createPopupTemplate();
-                //});
                 map.add(compositeLayer);
             }
             initializeLayer()
