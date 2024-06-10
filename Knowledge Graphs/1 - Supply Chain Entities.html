@@ -31,11 +31,7 @@
             "esri/PopupTemplate",
             "esri/widgets/Legend",
         ], (EsriMap, MapView, KnowledgeGraphService, KnowledgeGraphLayer, LabelClass, PopupTemplate, Legend) => {
-            /**
-             * Credentials to sign in to the knowledge graph service:
-             * username: viewer01
-             * password: I68VGU^nMurF
-             */
+
             //url to knowledge graph service
             const url = "https://adsrv2019.ad.local/server/rest/services/Hosted/SupplyChain_finished/KnowledgeGraphServer";
             //initialize map canvas and map view
@@ -52,7 +48,6 @@
             });
             view.ui.add(new Legend({ view: view }), "bottom-right");
 
-            //define renderer for the geometry (all of the Observations are point geometry)
             const supplierRenderer = {
                 type: "simple", // autocasts as new SimpleFillSymbol()
                 symbol: {
