@@ -135,12 +135,12 @@
                 color: [226, 119, 40],
                 width: 0.5
             };
-            function createLineGraphic(e1, e2){
+            function createLineGraphic(supplierCoord, distributorCoord){
                 var polyline = {
                     type: "polyline",
                     paths: [
-                        e1,
-                        e2
+                    supplierCoord,
+                    distributorCoord
                     ]
                 };
                 var polylineGraphic = new Graphic({
@@ -154,13 +154,16 @@
             const initializeLayerRels = async () => {
                 knowledgeGraph = await KnowledgeGraphService.fetchKnowledgeGraph(url)
                 KnowledgeGraphService.executeQuery(knowledgeGraph, {
-                    //openCypherQuery: `MATCH (s:Supplier)-[r:Supplies]->(d:Distributor) RETURN s.shape, r, d.shape`
-                    openCypherQuery: "MATCH (n:Supplier)-[r]->(m) RETURN n.shape"
+                    openCypherQuery: "MATCH (n:Supplier)-[r:Supplies]->(d:Distributor) RETURN n, r ,d"
                 }).then((queryResult) => {
                     queryResult.resultRows.forEach((element) => {
-                        var point = element[0];
-                        createLineGraphic([point.x,point.y], [-99.75260755400001, 32.397905658])
-                        console.log([point.x,point.y])
+                        var supplier = element[0];
+                        var suppliesRel = element[1];
+                        var distributor = element[2];
+                        console.log([supplier.properties.shape.x, supplier.properties.shape.y])
+                        console.log(suppliesRel)
+                        console.log([distributor.properties.shape.x, distributor.properties.shape.y])
+                        createLineGraphic([supplier.properties.shape.x, supplier.properties.shape.y], [distributor.properties.shape.x, distributor.properties.shape.y])
                     });
 
                 });
