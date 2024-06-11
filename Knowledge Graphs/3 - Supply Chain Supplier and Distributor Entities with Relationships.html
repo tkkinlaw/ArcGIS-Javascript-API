@@ -30,7 +30,8 @@
             "esri/layers/support/LabelClass",
             "esri/PopupTemplate",
             "esri/widgets/Legend",
-        ], (EsriMap, MapView, KnowledgeGraphService, KnowledgeGraphLayer, LabelClass, PopupTemplate, Legend) => {
+            "esri/Graphic",
+        ], (EsriMap, MapView, KnowledgeGraphService, KnowledgeGraphLayer, LabelClass, PopupTemplate, Legend, Graphic) => {
 
             //url to knowledge graph service
             const url = "https://adsrv2019.ad.local/server/rest/services/Hosted/SupplyChain_finished/KnowledgeGraphServer";
@@ -125,6 +126,44 @@
                 map.add(compositeLayer)
             }
             initializeLayer()
+
+            // Next, generate a polyline to visualize each supplier - distributor relationship
+            // Code for line symbology and function to create the line for each spatial entity pair
+            var lineSymbol = {
+                type: "simple-line", // autocasts as SimpleLineSymbol()
+                color: [226, 119, 40],
+                width: 0.5
+            };
+            function createLineGraphic(e1, e2){
+                var polyline = {
+                    type: "polyline",
+                    paths: [
+                        e1,
+                        e2
+                    ]
+                };
+                var polylineGraphic = new Graphic({
+                    geometry: polyline,
+                    symbol: lineSymbol
+                });
+                view.graphics.add(polylineGraphic);
+            }
+            createLineGraphic([-71.133060576, 42.566110906000006],[-99.75260755400001, 32.397905658])
+
+            // Grab the KG and query it for the spatial information and relationships
+            const initializeLayerRels = async () => {
+                knowledgeGraph = await KnowledgeGraphService.fetchKnowledgeGraph(url)
+                relatedResults = await KnowledgeGraphService.executeQuery(knowledgeGraph, {
+                    openCypherQuery: `MATCH (s:Supplier)-[r:Supplies]->(d:Distributor) RETURN s.shape, r, d.shape LIMIT 1`
+                });
+                const objectsArray = JSON.parse(relatedResults);
+                objectsArray.forEach((obj) => {
+                    // Access and log properties of each object
+                    console.log(obj._objectType);
+                    // Check if the property exists before accessing to avoid errors
+                });
+            }
+            initializeLayerRels()
         })
     </script>
 </head>

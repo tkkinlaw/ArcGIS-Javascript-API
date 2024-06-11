@@ -1,0 +1,86 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>ArcGIS Maps SDK for JavaScript Tutorials: Display a map</title>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.29/"></script>
+
+    <script>
+      require([
+      "esri/config",
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/layers/FeatureLayer",
+      "esri/Graphic",
+    ], function(esriConfig, Map, MapView, FeatureLayer, Graphic) {
+
+        esriConfig.apiKey = "AAPK6f8c20232d824c0cad547f55487e0ed1A9gi4ymtPeA1PGQHK9JHQOdVluwHASxyJU_6P7vRm3SeD76gYIeiZRPUFNj5wsyy";
+
+        const map = new Map({
+          basemap: "arcgis/topographic" // basemap styles service
+        });
+
+        const view = new MapView({
+          map: map,
+          center: [-71.133060576, 42.566110906000006], // Longitude, latitude
+          zoom: 13, // Zoom level
+          container: "viewDiv" // Div element
+        });
+
+        //var polyline = {
+        //type: "polyline", // autocasts as new Polyline()
+        //paths: [
+        //    [-71.133060576, 42.566110906000006],
+        //    [-99.75260755400001, 32.397905658]
+        //]
+        //};
+        var lineSymbol = {
+            type: "simple-line", // autocasts as SimpleLineSymbol()
+            color: [226, 119, 40],
+            width: 4
+        };
+
+        //var polylineGraphic = new Graphic({
+        //    geometry: polyline,
+        //    symbol: lineSymbol
+        //});
+
+        //view.graphics.add(polylineGraphic);
+
+        // function to create line graphic from input data
+        function createLineGraphic(e1, e2){
+            var polyline = {
+                type: "polyline",
+                paths: [
+                    e1,
+                    e2
+                ]
+            };
+            var polylineGraphic = new Graphic({
+                geometry: polyline,
+                symbol: lineSymbol
+            });
+            view.graphics.add(polylineGraphic);
+        }
+        createLineGraphic([-71.133060576, 42.566110906000006],[-99.75260755400001, 32.397905658])
+    });
+    </script>
+
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>

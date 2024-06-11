@@ -1,0 +1,79 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>ArcGIS Maps SDK for JavaScript Tutorials: Display a map</title>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.29/"></script>
+
+    <script>
+      require([
+      "esri/config",
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/layers/FeatureLayer",
+      "esri/Graphic",
+    ], function(esriConfig, Map, MapView, FeatureLayer, Graphic) {
+
+        esriConfig.apiKey = "AAPK6f8c20232d824c0cad547f55487e0ed1A9gi4ymtPeA1PGQHK9JHQOdVluwHASxyJU_6P7vRm3SeD76gYIeiZRPUFNj5wsyy";
+
+        const map = new Map({
+          basemap: "arcgis/topographic" // basemap styles service
+        });
+
+        const view = new MapView({
+          map: map,
+          center: [-95, 40], // Longitude, latitude
+          zoom: 4, // Zoom level
+          container: "viewDiv" // Div element
+        });
+
+        // Line graphic symbology
+        var lineSymbol = {
+            type: "simple-line", // autocasts as SimpleLineSymbol()
+            color: [226, 119, 40],
+            width: 4
+        };
+
+        var featureLayer = new FeatureLayer({
+            url: "https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/Satellite_VIIRS_Thermal_Hotspots_and_Fire_Activity/FeatureServer/0"
+        });
+
+        view.when(function(){
+        // function to create line graphic from input data
+            featureLayer.queryTopFeatures(100).then(function(results){
+                var features = results.features;
+                
+                //var geom1 = [-99.75260755400001, 32.397905658];
+                //var geom2 = [-71.133060576, 42.566110906000006];
+                //var polyline = {
+                //    type: "polyline",
+                //    paths: [geom1, geom2]
+                //};
+                //var polylineGraphic = new Graphic({
+                //    geometry: polyline,
+                //    symbol: lineSymbol
+                //});
+                //view.graphics.add(polylineGraphic);
+            });
+        });
+    });
+    </script>
+
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>
