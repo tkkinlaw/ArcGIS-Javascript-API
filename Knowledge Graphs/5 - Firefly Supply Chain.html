@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Search Knowledge Graph | Sample | ArcGIS Maps SDK for JavaScript 4.29</title>
+
+    <script type="module" src="https://js.arcgis.com/calcite-components/2.5.1/calcite.esm.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/2.5.1/calcite.css" />
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.29/"></script>
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/rest/knowledgeGraphService",
+            "esri/layers/KnowledgeGraphLayer",
+            "esri/layers/support/LabelClass",
+            "esri/PopupTemplate",
+            "esri/Graphic",
+            "esri/symbols/SimpleMarkerSymbol",
+            "esri/Basemap",
+        ], (EsriMap, MapView, KnowledgeGraphService, KnowledgeGraphLayer, LabelClass, PopupTemplate, Graphic, SimpleMarkerSymbol, Basemap) => {
+            //url to knowledge graph service
+            const url = "https://adsrv2019.ad.local/server/rest/services/Hosted/SupplyChain_finished/KnowledgeGraphServer";
+            // in this case the portalItem has to be a webmap
+            const basemap = new Basemap({
+            portalItem: {
+                id: "f727e117c074433cabf8cace85746d0f"  // World Imagery (Firefly) webmap, but from an ArcGIS Online org...
+            }
+            });
+            //initialize map canvas and map view
+            const map = new EsriMap({
+                basemap: basemap
+            });
+            const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                zoom: 2,
+                center: [-30, 30],
+                constraints: { minZoom: 2 }
+            });
+
+            // These symbols are from: https://vannizhang.github.io/firefly-symbols-generator/dist/
+            // Suppiers
+            var symbolSupplier = {
+                type: "picture-marker",  // autocasts as new PictureMarkerSymbol()
+                url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNui8sowAAAAWdEVYdENyZWF0aW9uIFRpbWUAMDkvMjEvMTfORjJUAAAFL0lEQVRogd2a227bRhCG/yEpyXbtxj0Eucqj1G8QP2vRvkCQPEquctEijo+itDu9EJca/ZzdpYwmgLPAYJcSRc7Hf2ZPlCBTQggQEYgIVBUAIH99kOFrGQyFula0UCsA6PWVAhh9UFW0betezL1pghhP2gEwRO24BsGOe8cHQACyMJMbWghHgWNsDsgxNgJ5MAc3dCBy1lDN7VyYeU89Us3tA8vBjDeqQLDjjTGhdkkZz7loTJ32BMyDmYAQBAO0pm4KNgckFiwM5wRkgPT6SicgMyCStU7Nnx0LEkwdnM88xSYwHd0oB8GOJ+vo2FOGQbynn2w71DLUoGvE4brRXG93EqmRU8FzvqO2B1QC8QC21A5kE3WSKhJCQPP3R6uEzYfGcXZhIGzbg8mBMESyDbUZ0ubPCBTf/aGdGfg4P6wa1tlFxhgmXcMWVsM6vcFUSfsgbNcdja8qIhD98z077wEsTL0cjNusTgmEVdgA6AfjNivlhllK9pIaCcg6vqLawiQgfro2HCxAcjynYnoA3hg0qtIRhKeMVSU57xkrw3li84OVsOdyOPE40mAaXmK7X+61vPCyMCeDMcwSh7liQWxupPDxernagGmBgOGGniIcVp4iJ2SsTAlkg7JyuQGTYQ4UyYWVBbJqMMzpYFaZOSA51bxxJgznBfJvhPGS/djQSiBWFfu0GSTlh+2mWQkeX7qhTjCTiWlSxMLUumGrCodXgrF54oH0KPdotjPwxibuGFxFctMTTxkvZ3bHIkuILCDDE1dEqG6gmoNIAD38ATYHMirCILXxpASzgsgpGjlD05yhkVOILHbu6gZRHxHjA6I22O0D2FBKCtQg3DWPDa2SMjWgPZjIGdr2Fbr2V5wsf0bXLgEA29Djqf+KbfgXGgBV2xXnpjm5GTWPN9lkn6POFEpkhbb5CV37G16d/463b85xebELrS+3EZ8+r3BzJ1DdQrWHasoFdn6OCm5ocTkGat8WdGjkFKvlBd6+OcfrX1qkdfXrrgVwjqd+jRBuIOigzjXmOT8p3rxmLtDURFqItFi0S1xeNGjb/bdtC1xeNFi0S4h0EGmPvn6h1EBeTKmBHLf3pBqgGrAJPb7cRoSw/zaEXZ5sQj+e94y9rVzJ5UjpYjyF2LcVW0R9xLq/xafPKwCc7HdY97eI+gidrC14nXEUUAKpPYnc/Odwlae6Roj3kPAPbu4U637tdr8h3kN1DX/B5K3Rq0p1RFjad/Kd56mE6sMupHSDEL66A6LqA/YrQGseFPvhKaMlReYApOnEfiquCgSNiNpD5D4zRVmT2aVtDSirSEmJGoRdnx/OnXZOlyaNawBPz4SZKGNDqwRiIRggNwGsTeMTwJMxBipuOFjfc6GVg+iQX2Pb38xZWNnQenRgcsp44TUqUktwbzHESvAksAZic8VCeKpUEz8XWnZJuUV+Bgr6jTcJrG0+WGUYxqrCuVIMLbtJbJ3LbU5z72Zz6JjtIK8X80LL3ZUHpqGVThAcro1re052Z+S5G3QJyNalhD/wO9f9MsgW08Kqfcst09p4Aokx2lcKpY2H77GJnRvpS91w1Osr7VQ1ae+pAkzDCZjmhh03vtVrhawa4/uRH+JFDwD7DtEmNcOUoEobBTmQEhA7747qen0Vc+8QeSYcne948LSQpZ0O+1tWxlvfZAGMjWW80Q/xetqCAHjZfxiYAVMC47bX4yUQBvKcza4Kq3/hKMCk8/63rZuckxWb/6caD8YAeVCl4zkgDOVBPu9vTgzzUv549h+rajJ/pv/LhgAAAABJRU5ErkJggg==',
+                width: '24px',
+                height: '24px'
+            };
+            // Distributors
+            // firefly symbol as Data URI
+            var symbolDistributor = {
+                type: "picture-marker",  // autocasts as new PictureMarkerSymbol()
+                url: 'data:image/png;base64,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',
+                width: '24px',
+                height: '24px'
+            };
+
+            const supplierRenderer = {
+                type: "simple", // autocasts as new SimpleFillSymbol()
+                symbol: symbolSupplier
+            };
+
+            const distributorRenderer = {
+                type: "simple", // autocasts as new SimpleFillSymbol()
+                symbol: symbolDistributor
+            };
+
+            const initializeLayer = async () => {
+                //fetch the knowledge graph
+                knowledgeGraph = await KnowledgeGraphService.fetchKnowledgeGraph(url)
+
+                let namedTypes = new Map();
+
+                // Get Suppliers
+                supplierResults = await KnowledgeGraphService.executeQuery(knowledgeGraph, {
+                    openCypherQuery: `MATCH (s:Supplier) RETURN s`
+                })
+
+                const supplierMembers = new Map();
+                for (supplier of supplierResults.resultRows) {
+                    supplierMembers.set(supplier[0].id, { id: supplier[0].id })
+                }
+
+                namedTypes.set("Supplier", { useAllData: false, members: supplierMembers});
+
+                // Get Distributors
+                distributorResults = await KnowledgeGraphService.executeQuery(knowledgeGraph, {
+                    openCypherQuery: `MATCH (d:Distributor) RETURN d`
+                })
+
+                const distributorMembers = new Map();
+                for (distributor of distributorResults.resultRows) {
+                    distributorMembers.set(distributor[0].id, { id: distributor[0].id })
+                }
+
+                namedTypes.set("Distributor", { useAllData: false, members: distributorMembers});
+
+                // specify the layer structure
+                const inclusionDef = {
+                    generateAllSublayers: false,
+                    namedTypeDefinitions: namedTypes
+                }
+
+                //create the layer
+                const compositeLayer = new KnowledgeGraphLayer({
+                    url: url,
+                    inclusionModeDefinition: inclusionDef
+                });
+
+                // load layer and display
+                await compositeLayer.load()
+                const sublayer1 = compositeLayer.layers.items[0]
+                sublayer1.renderer = supplierRenderer
+                const sublayer2 = compositeLayer.layers.items[1]
+                sublayer2.renderer = distributorRenderer
+                map.add(compositeLayer)
+            }
+            initializeLayer()
+
+            // Next, generate a polyline to visualize each supplier - distributor relationship
+            // Code for line symbology and function to create the line for each spatial entity pair
+            //var lineSymbol = {
+            //    type: "simple-line", // autocasts as SimpleLineSymbol()
+            //    color: [226, 119, 40],
+            //    width: 0.5
+            //};
+            // firefly symbol as Data URI
+            var lineSymbol = {
+                type: "simple-line",  // autocasts as new SimpleLineSymbol()
+                color: [251, 236, 212, 0.5], // RGB color (blue) with full opacity
+                width: 0.75,              // Line width in points
+                style: "dash"         // Line style (solid, dashed, etc.)
+            };
+
+            function createLineGraphic(supplierCoord, distributorCoord){
+                var polyline = {
+                    type: "polyline",
+                    paths: [
+                    supplierCoord,
+                    distributorCoord
+                    ]
+                };
+                var polylineGraphic = new Graphic({
+                    geometry: polyline,
+                    symbol: lineSymbol
+                });
+                view.graphics.add(polylineGraphic);
+            }
+
+            // Grab the KG and query it for the spatial information and relationships
+            const initializeLayerRels = async () => {
+                knowledgeGraph = await KnowledgeGraphService.fetchKnowledgeGraph(url)
+                KnowledgeGraphService.executeQuery(knowledgeGraph, {
+                    openCypherQuery: "MATCH (n:Supplier)-[r:Supplies]->(d:Distributor) RETURN n, r ,d"
+                }).then((queryResult) => {
+                    queryResult.resultRows.forEach((element) => {
+                        var supplier = element[0];
+                        var suppliesRel = element[1];
+                        var distributor = element[2];
+                        console.log([supplier.properties.shape.x, supplier.properties.shape.y])
+                        console.log(suppliesRel)
+                        console.log([distributor.properties.shape.x, distributor.properties.shape.y])
+                        createLineGraphic([supplier.properties.shape.x, supplier.properties.shape.y], [distributor.properties.shape.x, distributor.properties.shape.y])
+                    });
+
+                });
+            }
+            initializeLayerRels()
+        })
+    </script>
+</head>
+
+<body>
+    <div id="viewDiv"></div>
+</body>
+
+</html>
