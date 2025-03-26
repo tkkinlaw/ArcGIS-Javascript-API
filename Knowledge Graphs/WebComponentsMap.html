@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>ArcGIS Map Integration</title>
+
+    <script type="module" src="https://js.arcgis.com/calcite-components/3.0.3/calcite.esm.js"></script>
+    <script src="https://js.arcgis.com/4.32/"></script>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.32/esri/themes/light/main.css" />
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <arcgis-map item-id="MyMapID" zoom="5" center="-81.518430, 15.019943">
+        <arcgis-zoom position="top-right"></arcgis-zoom>
+    </arcgis-map>
+
+    <script>
+        require(["esri/config"], function(esriConfig) {
+            //esriConfig.apiKey = "MyAPIKEY";
+            const arcgisMap = document.querySelector("arcgis-map");
+            arcgisMap.addEventListener("arcgisViewReadyChange", () => {
+                arcgisMap.rotation = 90;
+            });
+        });
+    </script>
+</body>
+
+</html>
