@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Voxel Layer Only | ArcGIS Maps SDK for JavaScript 4.33</title>
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.33/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.33"></script>
+    <!--
+  This block of code customizes the popup for the voxel layer in the ArcGIS JavaScript web scene.
+  It waits for the map to load, finds the voxel layer, and sets a popupTemplate property.
+  The popupTemplate can include a title, text, HTML, or Arcade expressions to display variable values or other info.
+  When a user clicks the voxel layer, the custom popup will appear with the specified content.
+  -->
+
+    <script type="module">
+        const [SceneView, WebScene] = await $arcgis.import([
+            "@arcgis/core/views/SceneView.js",
+            "@arcgis/core/WebScene.js"
+        ]);
+        const map = new WebScene({
+            portalItem: {
+                id: "3a922ed0c7a8489ea4fbe8747ac560ba",
+            },
+        });
+        const view = new SceneView({
+            container: "viewDiv",
+            map: map,
+        });
+
+        map.when(() => {
+            const vxlLayer = map.allLayers.find(layer => layer.type === "voxel");
+
+            if (vxlLayer) {
+                vxlLayer.popupTemplate = {
+                    title: "Custom Voxel Info",
+                    expressionInfos: [
+                        {
+                            name: "voxelInfo",
+                            title: "Voxel Info",
+                            expression:
+                                `
+                                var depth = $voxel["Voxel.Depth"];
+                                var position = $voxel["Voxel.Position"];
+                                var localTime = $voxel["Voxel.LocalTime"]; 
+                                var currVar = $voxel["Voxel.CurrentVariable"];
+                                var txt = "Depth: " +
+                                        depth + TextFormatting.NewLine +
+                                        "Position: " + position + TextFormatting.NewLine +
+                                        "Local time: " + localTime + TextFormatting.NewLine +
+                                        "Current variable: " + currVar;
+                                return txt;
+                                `
+                        }
+                    ],
+                    content: [
+                        {
+                            type: "text",
+                            text: "{expression/voxelInfo}",
+                        },
+                    ],
+                };
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <div id="viewDiv"></div>
+</body>
+
+</html>
